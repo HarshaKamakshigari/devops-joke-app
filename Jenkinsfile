@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_USER = 'harshak07'
+        BACKEND_IMAGE = 'harshak07/devops-joke-backend'
+        FRONTEND_IMAGE = 'harshak07/devops-joke-frontend'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -29,34 +35,41 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh '''
-                    docker build -t devops-backend:latest ./backend
-                    docker build -t devops-frontend:latest ./frontend
+                    docker build -t ${BACKEND_IMAGE}:latest ./backend
+                    docker build -t ${FRONTEND_IMAGE}:latest ./frontend
                 '''
             }
         }
 
-        stage('Docker Compose Validation') {
+        stage('Push to Docker Hub') {
             steps {
-                sh '''
-                    docker compose config
-                '''
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+                        docker push ${BACKEND_IMAGE}:latest
+                        docker push ${FRONTEND_IMAGE}:latest
+
+                        docker logout
+                    '''
+                }
             }
         }
-
     }
 
     post {
-
         success {
-            echo 'CI pipeline completed successfully!'
+            echo 'CI/CD pipeline completed successfully!'
         }
 
         failure {
-            echo 'CI pipeline failed!'
-        }
-
-        always {
-            echo 'Pipeline finished.'
+            echo 'CI/CD pipeline failed!'
         }
     }
 }
