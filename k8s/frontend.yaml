@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joke-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joke-frontend
+  template:
+    metadata:
+      labels:
+        app: joke-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: harshak07/devops-joke-frontend:latest
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: joke-frontend
+spec:
+  selector:
+    app: joke-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: NodePort
