@@ -14,7 +14,7 @@ pipeline {
             steps {
                 sh '''
                     docker build -t devops-backend-test ./backend
-                    docker run --rm devops-backend-test pytest
+                    docker run --rm devops-backend-test python -m pytest
                 '''
             }
         }
