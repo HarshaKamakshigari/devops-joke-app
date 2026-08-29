@@ -12,19 +12,27 @@ pipeline {
 
         stage('Backend Tests') {
             steps {
-                dir('backend') {
-                    sh 'pip install -r requirements.txt'
-                    sh 'pytest'
-                }
+                sh '''
+                    docker build -t devops-backend-test ./backend
+                    docker run --rm devops-backend-test pytest
+                '''
             }
         }
 
         stage('Frontend Build') {
             steps {
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
+                sh '''
+                    docker build -t devops-frontend-test ./frontend
+                '''
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                    docker build -t devops-backend:latest ./backend
+                    docker build -t devops-frontend:latest ./frontend
+                '''
             }
         }
 
