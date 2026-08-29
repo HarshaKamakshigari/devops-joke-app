@@ -10,22 +10,33 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Backend Tests') {
             steps {
-                echo 'Building Joke App...'
+                dir('backend') {
+                    sh 'pip install -r requirements.txt'
+                    sh 'pytest'
+                }
             }
         }
 
-        stage('Test') {
+        stage('Frontend Build') {
             steps {
-                echo 'Running tests...'
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
             }
         }
 
-        stage('Success') {
-            steps {
-                echo 'CI pipeline completed successfully!'
-            }
+    }
+
+    post {
+        success {
+            echo 'CI pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'CI pipeline failed!'
         }
     }
 }
