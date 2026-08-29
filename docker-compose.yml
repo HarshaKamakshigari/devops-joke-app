@@ -1,0 +1,15 @@
+services:
+
+  backend:
+    build:
+      context: ./backend
+    container_name: joke-backend
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: joke-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
