@@ -1,5 +1,5 @@
+```groovy
 pipeline {
-
     agent any
 
     stages {
@@ -14,7 +14,7 @@ pipeline {
             steps {
                 sh '''
                     docker build -t devops-backend-test ./backend
-                    docker run --rm devops-backend-test python -m pytest
+                    docker run --rm devops-backend-test pytest
                 '''
             }
         }
@@ -36,9 +36,18 @@ pipeline {
             }
         }
 
+        stage('Docker Compose Validation') {
+            steps {
+                sh '''
+                    docker compose config
+                '''
+            }
+        }
+
     }
 
     post {
+
         success {
             echo 'CI pipeline completed successfully!'
         }
@@ -46,5 +55,10 @@ pipeline {
         failure {
             echo 'CI pipeline failed!'
         }
+
+        always {
+            echo 'Pipeline finished.'
+        }
     }
 }
+```
