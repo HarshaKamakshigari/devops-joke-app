@@ -1,13 +1,11 @@
 services:
 
   backend:
-    build:
-      context: ./backend
+    image: harshak07/devops-joke-backend:latest
     container_name: joke-backend
 
   frontend:
-    build:
-      context: ./frontend
+    image: harshak07/devops-joke-frontend:latest
     container_name: joke-frontend
     ports:
       - "3000:80"

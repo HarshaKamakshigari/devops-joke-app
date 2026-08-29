@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = 'harshak07'
         BACKEND_IMAGE = 'harshak07/devops-joke-backend'
         FRONTEND_IMAGE = 'harshak07/devops-joke-frontend'
     }
@@ -45,13 +44,15 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'dockerhub',
+                        credentialsId: 'dockerhub-credentials',
                         usernameVariable: 'DOCKER_USERNAME',
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
                     sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        echo "$DOCKER_PASSWORD" | docker login \
+                            -u "$DOCKER_USERNAME" \
+                            --password-stdin
 
                         docker push ${BACKEND_IMAGE}:latest
                         docker push ${FRONTEND_IMAGE}:latest
@@ -59,6 +60,31 @@ pipeline {
                         docker logout
                     '''
                 }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    echo "Pulling latest images..."
+
+                    docker pull ${BACKEND_IMAGE}:latest
+                    docker pull ${FRONTEND_IMAGE}:latest
+
+                    echo "Stopping current application..."
+
+                    docker compose down || true
+
+                    echo "Starting application with latest images..."
+
+                    docker compose up -d
+
+                    echo "Checking containers..."
+
+                    docker compose ps
+
+                    echo "Deployment completed successfully!"
+                '''
             }
         }
     }
